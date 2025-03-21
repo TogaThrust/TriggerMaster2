@@ -1,27 +1,24 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"os"
-
-	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
 
-type User struct {
-	ID       primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Username string             `json:"Username" bson:"Username"`
-	Password string             `json:"Password" bson:"Password"`
-}
-
 func main() {
-	err := godotenv.Load()
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	file, err := os.OpenFile(fmt.Sprintf("./logs/backend/app_%v.log", time.Now().Format("2006.01.02_15.04.05")), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal("Error loading .env file", err)
+		log.Fatal("Failed to open log file:", err)
 	}
-	PORT := os.Getenv("PORT")
-	if PORT == "" {
-		PORT = "4000"
-	}
-	apiApplication(PORT)
+	defer file.Close()
+
+	multiWriter := io.MultiWriter(os.Stdout, file)
+	log.SetOutput(multiWriter)
+
+	log.Println("Starting application...")
+	ApiApplication()
 }

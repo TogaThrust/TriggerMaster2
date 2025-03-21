@@ -14,8 +14,11 @@ const loginHook = () => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                            Username: values.email,
-                            Password: values.password
+                            User: values.email.match(/(.*)@/g)?.join(),
+                            Credentials: {
+                                Username: values.email,
+                                Password: values.password
+                            }
                         }),
                 });
 
